@@ -49,8 +49,14 @@ public class InvoicesController : Controller
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] InvoiceModel invoice)
     {
-        InvoiceModel invoiceCreated = await _invoiceRepository.CreateAsync(invoice);
+        try
+        {
+            await _invoiceRepository.GetByNumberAsync(invoice.Number);
+            return StatusCode(StatusCodes.Status409Conflict, "Ya existe una factura con este número");
+        }
+        catch (Exception) { }
 
+        InvoiceModel invoiceCreated = await _invoiceRepository.CreateAsync(invoice);
         return StatusCode(StatusCodes.Status201Created, invoiceCreated);
     }
 
@@ -61,10 +67,10 @@ public class InvoicesController : Controller
         return StatusCode(StatusCodes.Status200OK, result);
     }
 
-    [HttpGet("Invoices/GetInvoicesByNumber/{invoiceNumber}")]
-    public async Task<IActionResult> GetInvoicesByNumber(int invoiceNumber)
+    [HttpGet("Invoices/GetInvoiceByNumber/{invoiceNumber}")]
+    public async Task<IActionResult> GetInvoiceByNumber(int invoiceNumber)
     {
-        List<InvoiceViewModel> result = await _invoiceRepository.GetAllByNumberAsync(invoiceNumber);
+        InvoiceViewModel result = await _invoiceRepository.GetByNumberAsync(invoiceNumber);
         return StatusCode(StatusCodes.Status200OK, result);
     }
 

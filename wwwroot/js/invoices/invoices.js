@@ -1,8 +1,8 @@
 let searchByClient = true;
 
 function searchInvoices() {
-  let invoiceNumber = $("#invoice-number").val();
-  let invoiceClient = $("#invoice-client").val();
+  const invoiceNumber = document.getElementById("invoice-number").value;
+  const invoiceClient = document.getElementById("invoice-client").value;
 
   let message = "";
 
@@ -23,11 +23,19 @@ function searchInvoices() {
 async function getInvoices(invoiceClient, invoiceNumber) {
   const url = searchByClient
     ? `/Invoices/GetInvoicesByCustomer/${invoiceClient}`
-    : `/Invoices/GetInvoicesByNumber/${invoiceNumber}`;
+    : `/Invoices/GetInvoiceByNumber/${invoiceNumber}`;
 
   try {
     const response = await fetch(url);
-    const data = await response.json();
+    let data = [];
+
+    if (response.status === 200) {
+      data = await response.json();
+
+      if (!searchByClient) {
+        data = [data];
+      }
+    }
 
     const table = document.getElementById("invoices-table");
     const tableBody = table.getElementsByTagName("tbody")[0];
@@ -60,10 +68,14 @@ function format(number) {
   return formatter.format(parseFloat(number.toFixed(2)));
 }
 
-$(document).ready(function () {
-  $('input[type=radio][name="radio-option"]').change(function () {
-    searchByClient = this.value === "client";
-    $("#invoice-client").prop("disabled", !searchByClient);
-    $("#invoice-number").prop("disabled", searchByClient);
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll("input[type=radio][name='radio-option']")
+    .forEach((radio) => {
+      radio.addEventListener("change", function () {
+        searchByClient = this.value === "client";
+        $("#invoice-client").prop("disabled", !searchByClient);
+        $("#invoice-number").prop("disabled", searchByClient);
+      });
+    });
 });

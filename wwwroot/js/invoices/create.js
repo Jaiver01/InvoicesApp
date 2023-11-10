@@ -152,9 +152,13 @@ async function saveInvoice(invoice) {
     if (response.status === 201) {
       Swal.fire("", "La factura se creó correctamente", "success");
       newInvoice();
+    } else if (response.status === 409) {
+      Swal.fire(
+        "",
+        "Ya existe una factura con el mismo número, intenta nuevamente",
+        "warning"
+      );
     }
-
-    console.log(await response.json());
   } catch (error) {
     Swal.fire(
       "Error",

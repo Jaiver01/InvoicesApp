@@ -51,7 +51,7 @@ public class InvoiceRepository : IInvoiceRepository
         return BuildResult(result);
     }
 
-    public async Task<List<InvoiceViewModel>> GetAllByNumberAsync(int invoiceNumber)
+    public async Task<InvoiceViewModel> GetByNumberAsync(int invoiceNumber)
     {
         SqlParameter[] parameters = new SqlParameter[] {
             new("@NumeroFactura", invoiceNumber),
@@ -59,7 +59,14 @@ public class InvoiceRepository : IInvoiceRepository
 
         DataTable result = await _databaseContext.ExecuteQueryAsync("sp_BuscarFacturaPorNumero", parameters);
 
-        return BuildResult(result);
+        List<InvoiceViewModel> invoices = BuildResult(result);
+
+        if (invoices.Count == 0)
+        {
+            throw new Exception("No existe ningúna factura con este número"); // TODO: Create custom exception
+        }
+
+        return invoices[0];
     }
 
     public async Task<InvoiceModel> CreateAsync(InvoiceModel invoice)
